@@ -9,6 +9,7 @@ export const Contents = (): JSX.Element => {
     [...Array(DATA_LENGTH)].map((_, i) => i + 1)
   );
   const [loading, setLoading] = useState<boolean>(true);
+  const [cnt, setCnt] = useState<number>(0);
 
   const height: number = 200;
   const width: number = 200;
@@ -28,6 +29,7 @@ export const Contents = (): JSX.Element => {
         for (let j = 1; j < DATA_LENGTH - i; ++j) {
           if (array[j] < array[j - 1]) {
             [array[j - 1], array[j]] = [array[j], array[j - 1]];
+            setCnt((prev) => prev + 1);
           }
           await new Promise((resolve) => setTimeout(resolve, 1 / 2 ** 10));
           setData(array.slice());
@@ -57,6 +59,9 @@ export const Contents = (): JSX.Element => {
   return (
     <Container sx={{ py: 3 }}>
       <svg viewBox={`0 0 ${width} ${height}`}>
+        <text y="10" fontSize="10">
+          {`交換回数：${cnt} 回`}
+        </text>
         <g transform={`translate(${width},${height}) rotate(180)`}>
           {data.map((num, idx) => {
             return (
@@ -65,7 +70,7 @@ export const Contents = (): JSX.Element => {
                 x={(width * (DATA_LENGTH - idx)) / DATA_LENGTH}
                 y={0}
                 width={width / DATA_LENGTH}
-                height={yScale(num)}
+                height={yScale(num) * 0.9}
                 fontSize="5px"
                 fill={colorScale(num)}
               >
