@@ -1,8 +1,8 @@
 import * as d3 from "d3";
-import { Button, Container } from "@mui/material";
+import { Button, Container, Stack, Typography } from "@mui/material";
 import { useState, useCallback, Dispatch, SetStateAction } from "react";
 
-const DATA_LENGTH = 100;
+const DATA_LENGTH = 50;
 
 export const Contents = (): JSX.Element => {
   const [data, setData] = useState<number[]>(
@@ -87,38 +87,52 @@ export const Contents = (): JSX.Element => {
       >
         init
       </Button>
+      <Stack spacing={2} direction="row" sx={{ p: 1 }}>
+        <Typography variant="h3" component="div">
+          <Typography component="em">
+            <Typography variant="h3" component="b">
+              O
+            </Typography>
+          </Typography>
+          (n
+          <Typography variant="h5" component="sup">
+            2
+          </Typography>
+          )
+        </Typography>
 
-      <Button
-        variant="contained"
-        onClick={() => sort(bubbleSort(data, setCompareCnt, setCnt, setData))}
-        disabled={loading || !shuffled}
-      >
-        bubble
-      </Button>
-      <Button
-        variant="contained"
-        onClick={() =>
-          sort(insertionSort(data, setCompareCnt, setCnt, setData))
-        }
-        disabled={loading || !shuffled}
-      >
-        insertion
-      </Button>
-      <Button
-        variant="contained"
-        onClick={() =>
-          sort(selectionSort(data, setCompareCnt, setCnt, setData))
-        }
-        disabled={loading || !shuffled}
-      >
-        selection
-      </Button>
+        <Button
+          variant="contained"
+          onClick={() => sort(bubbleSort(data, setCompareCnt, setCnt, setData))}
+          disabled={loading || !shuffled}
+        >
+          bubble
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() =>
+            sort(insertionSort(data, setCompareCnt, setCnt, setData))
+          }
+          disabled={loading || !shuffled}
+        >
+          insertion
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() =>
+            sort(selectionSort(data, setCompareCnt, setCnt, setData))
+          }
+          disabled={loading || !shuffled}
+        >
+          selection
+        </Button>
+      </Stack>
     </Container>
   );
 };
 
 const bubbleSort = async (
-  [...array]: number[],
+  array: number[],
   setCompareCnt: Dispatch<SetStateAction<number>>,
   setCnt: Dispatch<SetStateAction<number>>,
   setData: Dispatch<SetStateAction<number[]>>
@@ -137,7 +151,7 @@ const bubbleSort = async (
 };
 
 const insertionSort = async (
-  [...array]: number[],
+  array: number[],
   setCompareCnt: Dispatch<SetStateAction<number>>,
   setCnt: Dispatch<SetStateAction<number>>,
   setData: Dispatch<SetStateAction<number[]>>
@@ -156,7 +170,7 @@ const insertionSort = async (
 };
 
 const selectionSort = async (
-  [...array]: number[],
+  array: number[],
   setCompareCnt: Dispatch<SetStateAction<number>>,
   setCnt: Dispatch<SetStateAction<number>>,
   setData: Dispatch<SetStateAction<number[]>>
