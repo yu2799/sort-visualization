@@ -1,14 +1,15 @@
 import * as d3 from "d3";
 import { Button, Container } from "@mui/material";
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 
-const DATA_LENGTH = 100;
+const DATA_LENGTH = 50;
 
 export const Contents = (): JSX.Element => {
   const [data, setData] = useState<number[]>(
     [...Array(DATA_LENGTH)].map((_, i) => i + 1)
   );
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [shuffled, setShuffled] = useState<boolean>(false);
   const [cnt, setCnt] = useState<number>(0);
 
   const height: number = 200;
@@ -35,10 +36,13 @@ export const Contents = (): JSX.Element => {
           setData(array.slice());
         }
       }
-    })(data).then(() => setLoading(true));
+    })(data).then(() => {
+      setShuffled(false);
+      setLoading(false);
+    });
   };
 
-  useEffect(() => {
+  const handleShuffled = () => {
     setLoading(true);
     const shuffle = async (
       [...array]: number[],
@@ -53,8 +57,11 @@ export const Contents = (): JSX.Element => {
         }
       }
     };
-    shuffle(data, 2).then(() => setLoading(false));
-  }, []);
+    shuffle(data, 2).then(() => {
+      setShuffled(true);
+      setLoading(false);
+    });
+  };
 
   return (
     <Container sx={{ py: 3 }}>
@@ -80,7 +87,18 @@ export const Contents = (): JSX.Element => {
           })}
         </g>
       </svg>
-      <Button variant="contained" onClick={bubbleSort} disabled={loading}>
+      <Button
+        variant="contained"
+        onClick={handleShuffled}
+        disabled={loading || shuffled}
+      >
+        init
+      </Button>
+      <Button
+        variant="contained"
+        onClick={bubbleSort}
+        disabled={loading || !shuffled}
+      >
         sort
       </Button>
     </Container>
