@@ -13,7 +13,7 @@ export const Contents = (): JSX.Element => {
   const [compareCnt, setCompareCnt] = useState<number>(0);
   const [cnt, setCnt] = useState<number>(0);
 
-  const height: number = 200;
+  const height: number = 150;
   const width: number = 200;
   const colorScale = useCallback(
     d3.scaleSequential(d3.interpolateRainbow).domain([0, DATA_LENGTH]),
@@ -143,6 +143,17 @@ export const Contents = (): JSX.Element => {
           >
             merge
           </Button>
+          <Button
+            variant="contained"
+            onClick={() =>
+              sort(
+                quickSort(data, setCompareCnt, setCnt, setData, 0, DATA_LENGTH)
+              )
+            }
+            disabled={loading || !shuffled}
+          >
+            quick
+          </Button>
         </Stack>
       </Stack>
     </Container>
@@ -239,4 +250,41 @@ const mergeSort = async (
     setData(array.slice());
     await new Promise((resolve) => setTimeout(resolve, 10));
   }
+};
+
+const quickSort = async (
+  array: number[],
+  setCompareCnt: Dispatch<SetStateAction<number>>,
+  setCnt: Dispatch<SetStateAction<number>>,
+  setData: Dispatch<SetStateAction<number[]>>,
+  left: number,
+  right: number
+) => {
+  if (right - left <= 1) return;
+  const pivotIdx = Math.floor((left + right) / 2);
+  const pivot = array[pivotIdx];
+  [array[pivotIdx], array[right - 1]] = [array[right - 1], array[pivotIdx]];
+  setData(array.slice());
+  setCnt((prev) => prev + 1);
+  setCompareCnt((prev) => prev + 1);
+  await new Promise((resolve) => setTimeout(resolve, 10));
+
+  let i = left;
+  for (let j = i; j < right - 1; ++j) {
+    if (array[j] < pivot) {
+      [array[i++], array[j]] = [array[j], array[i]];
+      setData(array.slice());
+      setCnt((prev) => prev + 1);
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+    setCompareCnt((prev) => prev + 1);
+  }
+  [array[i], array[right - 1]] = [array[right - 1], array[i]];
+  setData(array.slice());
+  setCnt((prev) => prev + 1);
+  setCompareCnt((prev) => prev + 1);
+  await new Promise((resolve) => setTimeout(resolve, 10));
+
+  await quickSort(array, setCompareCnt, setCnt, setData, left, i);
+  await quickSort(array, setCompareCnt, setCnt, setData, i + 1, right);
 };
