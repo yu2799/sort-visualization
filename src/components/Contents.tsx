@@ -237,6 +237,6 @@ const mergeSort = async (
     }
     setCompareCnt((prev) => prev + 1);
     setData(array.slice());
+    await new Promise((resolve) => setTimeout(resolve, 10));
   }
-  await new Promise((resolve) => setTimeout(resolve, 100));
 };
