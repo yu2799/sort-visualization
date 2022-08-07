@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 import { Button, Container } from "@mui/material";
-import { useState, useCallback } from "react";
+import { useState, useCallback, Dispatch, SetStateAction } from "react";
 
 const DATA_LENGTH = 50;
 
@@ -23,20 +23,9 @@ export const Contents = (): JSX.Element => {
     []
   );
 
-  const bubbleSort = () => {
+  const sort = (func: Promise<void>) => {
     setLoading(true);
-    (async ([...array]: number[]) => {
-      for (let i = 0; i < DATA_LENGTH - 1; ++i) {
-        for (let j = 1; j < DATA_LENGTH - i; ++j) {
-          if (array[j] < array[j - 1]) {
-            [array[j - 1], array[j]] = [array[j], array[j - 1]];
-            setCnt((prev) => prev + 1);
-          }
-          await new Promise((resolve) => setTimeout(resolve, 1 / 2 ** 10));
-          setData(array.slice());
-        }
-      }
-    })(data).then(() => {
+    func.then(() => {
       setShuffled(false);
       setLoading(false);
     });
@@ -94,13 +83,55 @@ export const Contents = (): JSX.Element => {
       >
         init
       </Button>
+
       <Button
         variant="contained"
-        onClick={bubbleSort}
+        onClick={() => sort(bubbleSort(data, setCnt, setData))}
         disabled={loading || !shuffled}
       >
-        sort
+        bubble
+      </Button>
+      <Button
+        variant="contained"
+        onClick={() => sort(insertionSort(data, setCnt, setData))}
+        disabled={loading || !shuffled}
+      >
+        insertion
       </Button>
     </Container>
   );
+};
+
+const bubbleSort = async (
+  [...array]: number[],
+  setCnt: Dispatch<SetStateAction<number>>,
+  setData: Dispatch<SetStateAction<number[]>>
+) => {
+  for (let i = 0; i < DATA_LENGTH - 1; ++i) {
+    for (let j = 1; j < DATA_LENGTH - i; ++j) {
+      if (array[j] < array[j - 1]) {
+        [array[j - 1], array[j]] = [array[j], array[j - 1]];
+        setCnt((prev) => prev + 1);
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1 / 2 ** 10));
+      setData(array.slice());
+    }
+  }
+};
+
+const insertionSort = async (
+  [...array]: number[],
+  setCnt: Dispatch<SetStateAction<number>>,
+  setData: Dispatch<SetStateAction<number[]>>
+) => {
+  for (let i = 1; i < DATA_LENGTH; ++i) {
+    let j = i;
+    while (j !== 0 && array[j - 1] > array[j]) {
+      [array[j - 1], array[j]] = [array[j], array[j - 1]];
+      --j;
+      setCnt((prev) => prev + 1);
+      setData(array.slice());
+      await new Promise((resolve) => setTimeout(resolve, 1 / 2 ** 10));
+    }
+  }
 };
