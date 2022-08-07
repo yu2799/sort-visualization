@@ -2,7 +2,7 @@ import * as d3 from "d3";
 import { Button, Container, Stack, Typography } from "@mui/material";
 import { useState, useCallback, Dispatch, SetStateAction } from "react";
 
-const DATA_LENGTH = 50;
+const DATA_LENGTH: number = 100;
 
 export const Contents = (): JSX.Element => {
   const [data, setData] = useState<number[]>(
@@ -71,11 +71,8 @@ export const Contents = (): JSX.Element => {
                 y={0}
                 width={width / DATA_LENGTH}
                 height={yScale(num) * 0.9}
-                fontSize="5px"
                 fill={colorScale(num)}
-              >
-                {num}
-              </rect>
+              />
             );
           })}
         </g>
@@ -126,6 +123,27 @@ export const Contents = (): JSX.Element => {
         >
           selection
         </Button>
+        <Stack spacing={2} direction="row" sx={{ p: 1 }}>
+          <Typography variant="h3" component="div">
+            <Typography component="em">
+              <Typography variant="h3" component="b">
+                O
+              </Typography>
+            </Typography>
+            (nlogn)
+          </Typography>
+          <Button
+            variant="contained"
+            onClick={() =>
+              sort(
+                mergeSort(data, setCompareCnt, setCnt, setData, 0, DATA_LENGTH)
+              )
+            }
+            disabled={loading || !shuffled}
+          >
+            merge
+          </Button>
+        </Stack>
       </Stack>
     </Container>
   );
@@ -190,4 +208,35 @@ const selectionSort = async (
     setData(array.slice());
     await new Promise((resolve) => setTimeout(resolve, 1 / 2 ** 10));
   }
+};
+
+const mergeSort = async (
+  array: number[],
+  setCompareCnt: Dispatch<SetStateAction<number>>,
+  setCnt: Dispatch<SetStateAction<number>>,
+  setData: Dispatch<SetStateAction<number[]>>,
+  left: number,
+  right: number
+) => {
+  if (right - left === 1) return;
+  const mid = Math.floor(left + (right - left) / 2);
+  await mergeSort(array, setCompareCnt, setCnt, setData, left, mid);
+  await mergeSort(array, setCompareCnt, setCnt, setData, mid, right);
+
+  const tmp = [];
+  for (let i = left; i < mid; ++i) tmp.push(array[i]);
+  for (let i = right - 1; i >= mid; --i) tmp.push(array[i]);
+
+  let leftIdx = 0;
+  let rightIdx = tmp.length - 1;
+  for (let i = left; i < right; ++i) {
+    if (tmp[leftIdx] < tmp[rightIdx]) {
+      array[i] = tmp[leftIdx++];
+    } else {
+      array[i] = tmp[rightIdx--];
+    }
+    setCompareCnt((prev) => prev + 1);
+    setData(array.slice());
+  }
+  await new Promise((resolve) => setTimeout(resolve, 100));
 };
