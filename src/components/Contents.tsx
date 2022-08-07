@@ -1,13 +1,23 @@
 import * as d3 from "d3";
-import { Button, Container, Stack, Typography } from "@mui/material";
-import { useState, useCallback, Dispatch, SetStateAction } from "react";
-
-const DATA_LENGTH: number = 100;
+import {
+  Button,
+  Container,
+  Grid,
+  Slider,
+  Stack,
+  Typography,
+} from "@mui/material";
+import {
+  useState,
+  useCallback,
+  Dispatch,
+  SetStateAction,
+  useEffect,
+} from "react";
 
 export const Contents = (): JSX.Element => {
-  const [data, setData] = useState<number[]>(
-    [...Array(DATA_LENGTH)].map((_, i) => i + 1)
-  );
+  const [dataLength, setDataLength] = useState<number>(100);
+  const [data, setData] = useState<number[]>([0]);
   const [loading, setLoading] = useState<boolean>(false);
   const [shuffled, setShuffled] = useState<boolean>(false);
   const [compareCnt, setCompareCnt] = useState<number>(0);
@@ -16,13 +26,28 @@ export const Contents = (): JSX.Element => {
   const height: number = 150;
   const width: number = 200;
   const colorScale = useCallback(
-    d3.scaleSequential(d3.interpolateRainbow).domain([0, DATA_LENGTH]),
-    []
+    d3.scaleSequential(d3.interpolateRainbow).domain([0, dataLength]),
+    [dataLength]
   );
   const yScale = useCallback(
-    d3.scaleLinear().domain([0, DATA_LENGTH]).range([0, height]),
-    []
+    d3.scaleLinear().domain([0, dataLength]).range([0, height]),
+    [dataLength]
   );
+
+  const marks = [
+    {
+      value: 10,
+      label: 10,
+    },
+    {
+      value: 100,
+      label: 100,
+    },
+    {
+      value: 200,
+      label: 200,
+    },
+  ];
 
   const sort = (func: Promise<void>) => {
     setLoading(true);
@@ -44,7 +69,7 @@ export const Contents = (): JSX.Element => {
         for (let i = array.length - 1; i >= 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [array[i], array[j]] = [array[j], array[i]];
-          await new Promise((resolve) => setTimeout(resolve, DATA_LENGTH / 20));
+          await new Promise((resolve) => setTimeout(resolve, dataLength / 20));
           setData(array.slice());
         }
       }
@@ -55,108 +80,157 @@ export const Contents = (): JSX.Element => {
     });
   };
 
-  return (
-    <Container sx={{ py: 3 }}>
-      <svg viewBox={`0 0 ${width} ${height}`}>
-        <g fontSize="5">
-          <text y="5">{`比較回数：${compareCnt} 回`}</text>
-          <text y="15">{`交換回数：${cnt} 回`}</text>
-        </g>
-        <g transform={`translate(${width},${height}) rotate(180)`}>
-          {data.map((num, idx) => {
-            return (
-              <rect
-                key={idx}
-                x={(width * (DATA_LENGTH - idx - 1)) / DATA_LENGTH}
-                y={0}
-                width={width / DATA_LENGTH}
-                height={yScale(num) * 0.9}
-                fill={colorScale(num)}
-              />
-            );
-          })}
-        </g>
-      </svg>
-      <Button
-        variant="contained"
-        onClick={handleShuffled}
-        disabled={loading || shuffled}
-      >
-        init
-      </Button>
-      <Stack spacing={2} direction="row" sx={{ p: 1 }}>
-        <Typography variant="h3" component="div">
-          <Typography component="em">
-            <Typography variant="h3" component="b">
-              O
-            </Typography>
-          </Typography>
-          (n
-          <Typography variant="h5" component="sup">
-            2
-          </Typography>
-          )
-        </Typography>
+  const handleChange = (event: Event, newValue: number | number[]) => {
+    setDataLength(newValue as number);
+  };
 
-        <Button
-          variant="contained"
-          onClick={() => sort(bubbleSort(data, setCompareCnt, setCnt, setData))}
-          disabled={loading || !shuffled}
-        >
-          bubble
-        </Button>
-        <Button
-          variant="contained"
-          onClick={() =>
-            sort(insertionSort(data, setCompareCnt, setCnt, setData))
-          }
-          disabled={loading || !shuffled}
-        >
-          insertion
-        </Button>
-        <Button
-          variant="contained"
-          onClick={() =>
-            sort(selectionSort(data, setCompareCnt, setCnt, setData))
-          }
-          disabled={loading || !shuffled}
-        >
-          selection
-        </Button>
-        <Stack spacing={2} direction="row" sx={{ p: 1 }}>
-          <Typography variant="h3" component="div">
-            <Typography component="em">
-              <Typography variant="h3" component="b">
-                O
+  useEffect(() => {
+    setData([...Array(dataLength)].map((_, i) => i + 1));
+  }, [dataLength]);
+  return (
+    <>
+      {data.length === 1 ? (
+        <div>loading...</div>
+      ) : (
+        <Container sx={{ py: 3 }}>
+          <svg viewBox={`0 0 ${width} ${height}`}>
+            <g fontSize="5" style={{ userSelect: "none" }}>
+              <text y="5">{`比較回数：${compareCnt} 回`}</text>
+              <text y="15">{`交換回数：${cnt} 回`}</text>
+            </g>
+            <g transform={`translate(${width},${height}) rotate(180)`}>
+              {data.map((num, idx) => {
+                return (
+                  <rect
+                    key={idx}
+                    x={(width * (dataLength - idx - 1)) / dataLength}
+                    y={0}
+                    width={width / dataLength}
+                    height={yScale(num) * 0.9}
+                    fill={colorScale(num)}
+                  />
+                );
+              })}
+            </g>
+          </svg>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={2}>
+              <Button
+                variant="contained"
+                onClick={handleShuffled}
+                disabled={loading || shuffled}
+              >
+                init
+              </Button>
+            </Grid>
+            <Grid item xs={1}>
+              <Typography>array length</Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <Slider
+                defaultValue={100}
+                min={10}
+                max={200}
+                step={10}
+                valueLabelDisplay="auto"
+                marks={marks}
+                onChange={handleChange}
+                disabled={loading || shuffled}
+              />
+            </Grid>
+          </Grid>
+
+          <Stack spacing={2} direction="row" sx={{ p: 1 }}>
+            <Typography variant="h3" component="div">
+              <Typography component="em">
+                <Typography variant="h3" component="b">
+                  O
+                </Typography>
               </Typography>
+              (n
+              <Typography variant="h5" component="sup">
+                2
+              </Typography>
+              )
             </Typography>
-            (nlogn)
-          </Typography>
-          <Button
-            variant="contained"
-            onClick={() =>
-              sort(
-                mergeSort(data, setCompareCnt, setCnt, setData, 0, DATA_LENGTH)
-              )
-            }
-            disabled={loading || !shuffled}
-          >
-            merge
-          </Button>
-          <Button
-            variant="contained"
-            onClick={() =>
-              sort(
-                quickSort(data, setCompareCnt, setCnt, setData, 0, DATA_LENGTH)
-              )
-            }
-            disabled={loading || !shuffled}
-          >
-            quick
-          </Button>
-        </Stack>
-      </Stack>
-    </Container>
+
+            <Button
+              variant="contained"
+              onClick={() =>
+                sort(bubbleSort(data, setCompareCnt, setCnt, setData))
+              }
+              disabled={loading || !shuffled}
+            >
+              bubble
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() =>
+                sort(insertionSort(data, setCompareCnt, setCnt, setData))
+              }
+              disabled={loading || !shuffled}
+            >
+              insertion
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() =>
+                sort(selectionSort(data, setCompareCnt, setCnt, setData))
+              }
+              disabled={loading || !shuffled}
+            >
+              selection
+            </Button>
+            <Stack spacing={2} direction="row" sx={{ p: 1 }}>
+              <Typography variant="h3" component="div">
+                <Typography component="em">
+                  <Typography variant="h3" component="b">
+                    O
+                  </Typography>
+                </Typography>
+                (nlogn)
+              </Typography>
+              <Button
+                variant="contained"
+                onClick={() =>
+                  sort(
+                    mergeSort(
+                      data,
+                      setCompareCnt,
+                      setCnt,
+                      setData,
+                      0,
+                      dataLength
+                    )
+                  )
+                }
+                disabled={loading || !shuffled}
+              >
+                merge
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() =>
+                  sort(
+                    quickSort(
+                      data,
+                      setCompareCnt,
+                      setCnt,
+                      setData,
+                      0,
+                      dataLength
+                    )
+                  )
+                }
+                disabled={loading || !shuffled}
+              >
+                quick
+              </Button>
+            </Stack>
+          </Stack>
+        </Container>
+      )}
+    </>
   );
 };
 
